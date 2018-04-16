@@ -1,0 +1,67 @@
+#include<sys/types.h>
+#include<unistd.h>
+#include<stdio.h>
+#include<pthread.h>
+static int b[30],i;
+void *thread_function(int n);
+void *print(int m);
+pthread_mutex_t mutex;
+void *thread_function(int n) {    // the work to be done by the thread is defined in this function
+int next,first=0,c,second=1;i=0;
+printf("fibo naaci series of %d\n",n);
+for ( c = 0 ; c < n ; c++,i++ )
+   {
+      if ( c <= 1 )
+         next = c;
+      else
+      {
+         next = first + second;
+         first = second;
+         second = next;
+      }
+	pthread_mutex_lock(&mutex);
+	b[i]=next;
+      printf("%d\n",b[i]);
+	pthread_mutex_unlock(&mutex);
+   }
+
+}
+void *print(int m)
+{
+int j=0;
+//for(j=0;j<m;j++)
+//printf("%d\n",b[i]);
+}
+int main()
+{
+                pid_t  p;
+		pthread_t t1,t2;
+		int a;
+		int m; 
+		printf("enter number\n"); 
+		scanf("%d",&m);
+		
+                p=fork(); // creates duplicate process P1
+                switch(p)
+                {
+                                case -1:
+                                                printf("Error\n");
+                                                break;
+                                case 0:  // executed by child
+						printf("I am child process came from parent process\n");
+                                                //printf("child process completed\n");
+						pthread_mutex_init(&mutex, NULL);
+						pthread_create(&t1, NULL,(void *) thread_function, m); //thread is created
+						pthread_join(t1,NULL); //process waits for thread to finish . Comment this line to see the difference
+						
+						break;
+                                default:  // executed by parent
+						printf("I am parent process I executes first\n");						
+						wait();
+						sleep(3);
+						pthread_create(&t2, NULL,(void *) print,m); //thread is created
+						pthread_join(t2,NULL); //process waits for thread to finish . Comment this line to see the difference
+						printf("parent process completed\n");                                                
+						break;
+                }
+}
